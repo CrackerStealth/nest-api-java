@@ -16,7 +16,6 @@ import ca.chrisgraham.nest.api.structure.Structure;
 import ca.chrisgraham.nest.api.exception.NestApiCommunicationException;
 import ca.chrisgraham.nest.api.exception.NestApiException;
 import ca.chrisgraham.nest.api.exception.NestApiParseException;
-import ca.chrisgraham.nest.api.exception.NestApiValidationException;
 
 import static ca.chrisgraham.nest.api.NestApiKeyConstants.*;
 
@@ -28,10 +27,11 @@ import static ca.chrisgraham.nest.api.NestApiKeyConstants.*;
  * @since 0.0.1
  */
 public class NestApi {
-	private final static String NEST_API_URL = "https://developer-api.nest.com";
+	public final static String NEST_API_URL = "https://developer-api.nest.com";
+	public final static String NEST_API_AUTH_PARAMETER_NAME = "auth";
+	
 	//private final static String NEST_API_AUTHORIZATION_URL = "https://home.nest.com/login/oauth2?client_id=<CLIENT_ID>&state=<STATE_ID>";
 	private final static String NEST_ACCESS_TOKEN_URL = "https://api.home.nest.com/oauth2/access_token";
-	private final static String NEST_API_AUTH_PARAMETER_NAME = "auth";
 	private final static String NEST_API_CLIENT_ID_PARAMETER_NAME = "client_id";
 	private final static String NEST_API_CLIENT_SECRET_PARAMETER_NAME = "client_secret";
 	//private final static String NEST_API_STATE_PARAMETER_NAME = "state";
@@ -156,15 +156,7 @@ public class NestApi {
 		return response;
 	}
 	
-	public synchronized void refresh () throws NestApiException {
-		if ( changesMade() ) {
-			throw new NestApiValidationException("Changes have been made that were not sent to the Nest API. Either submit the changes or use a forceRefresh().");
-		}
-		
-		forceRefresh();
-	}
-	
-	public synchronized void forceRefresh () throws NestApiException {
+	public void refresh () throws NestApiException {
 		String rawResponse = null;
 		
 		try {
@@ -196,82 +188,6 @@ public class NestApi {
 		} catch (Exception ex) {
 			throw new NestApiParseException("Could not parse Structures from JSON response body: " + ex.getMessage());
 		}		
-	}
-	
-	public synchronized void submit () throws NestApiException {
-		if ( !changesMade() ) {
-			throw new NestApiValidationException("No changes to send to the Nest API.");
-		}
-		
-		JSONObject rootJson = new JSONObject();
-		JSONObject deviceJson = new JSONObject();
-		JSONObject thermJson = new JSONObject();
-		JSONObject smokeCoJson = new JSONObject();
-		JSONObject structJson = new JSONObject();
-		
-		for (Thermostat item : thermostats) {
-			if ( item.isChanged() ) {
-				for (NestApiChangeItem change : item.getChanges() ) {
-					System.out.println(sendNestApiUpdates(change.getPath(), change.getChangedData()));
-				}
-			}
-		}
-		
-		for (SmokeCoAlarm item : smokeCoAlarms) {
-			if ( item.isChanged() ) {
-				for (NestApiChangeItem change : item.getChanges() ) {
-					System.out.println(sendNestApiUpdates(change.getPath(), change.getChangedData()));
-				}
-			}
-		}
-		
-		for (Structure item : structures) {
-			if ( item.isChanged() ) {
-				for (NestApiChangeItem change : item.getChanges() ) {
-					System.out.println(sendNestApiUpdates(change.getPath(), change.getChangedData()));
-				}
-			}
-		}
-		
-		if ( thermJson.length() > 0 ) {
-			deviceJson.put(NEST_API_THERMOSTATS_KEY, thermJson);
-		}
-		
-		if ( smokeCoJson.length() > 0 ) {
-			deviceJson.put(NEST_API_SMOKE_CO_ALARMS_KEY, smokeCoJson);
-		}
-		
-		if ( deviceJson.length() > 0 ) {
-			rootJson.put(NEST_API_DEVICES_KEY, deviceJson);
-		}
-		
-		if ( structJson.length() >0 ) {
-			rootJson.put(NEST_API_STRCUTURES_KEY, structJson);
-		}
-		
-		forceRefresh();
-	}
-	
-	public boolean changesMade () {
-		for ( int i = 0; i < thermostats.size(); i++ ) {
-			if ( thermostats.get(i).isChanged() ) {
-				return true;
-			}
-		}
-		
-		for ( int i = 0; i < smokeCoAlarms.size(); i++ ) {
-			if ( smokeCoAlarms.get(i).isChanged() ) {
-				return true;
-			}
-		}
-		
-		for ( int i = 0; i < structures.size(); i++ ) {
-			if ( structures.get(i).isChanged() ) {
-				return true;
-			}
-		}
-		
-		return false;
 	}
 	
 	public String[] getThermostatIdList () {
@@ -397,29 +313,9 @@ public class NestApi {
 		return response;
 	}
 	
-	private String sendNestApiUpdates (String path, String body) throws NestApiException, NestApiCommunicationException {
-		try {
-			String response = null;
-			
-			StringBuilder requestParam = new StringBuilder();
-			NestApiUtility.addEncodedParameter(requestParam, NEST_API_AUTH_PARAMETER_NAME, token);
-			
-			String url = NEST_API_URL + path + "?" + requestParam.toString();
-			
-			response = NestApiUtility.handleHTTPSPut(url, body, timeout);
-			
-			return response;
-		} catch (UnsupportedEncodingException ex) {
-			throw new NestApiException("Could not encode URL parameters to communicate with the Nest API: " + ex.getMessage());
-		} catch (IOException ex) {
-			throw new NestApiCommunicationException("Could not communicate with the Nest API: " + ex.getMessage());
-		} catch (InterruptedException ex) {
-			throw new NestApiCommunicationException("The Nest API took too long to respond: " + ex.getMessage());
-		}
-	}
-	
-	private synchronized void parseThermostats (JSONObject json) throws Exception {		
+	private void parseThermostats (JSONObject json) throws Exception {		
 		JSONObject devices = json.optJSONObject(NEST_API_DEVICES_KEY);
+		thermostats = Collections.synchronizedList(new ArrayList<Thermostat>());
 		
 		if (devices == null) {
 			return;
@@ -431,16 +327,19 @@ public class NestApi {
 			return;
 		}
 		
-		thermostats = Collections.synchronizedList(new ArrayList<Thermostat>());
-		
 		for (String name : JSONObject.getNames(therm)) {
 			JSONObject item = therm.getJSONObject(name);
-			thermostats.add(new Thermostat(item.toString()));
+			
+			Thermostat newTherm = new Thermostat(this);
+			newTherm.parseJson(item.toString());
+			
+			thermostats.add(newTherm);
 		}
 	}
 
-	private synchronized void parseSmokeCoAlarms (JSONObject json) throws Exception {
+	private void parseSmokeCoAlarms (JSONObject json) throws Exception {
 		JSONObject devices = json.optJSONObject(NEST_API_DEVICES_KEY);
+		smokeCoAlarms = Collections.synchronizedList(new ArrayList<SmokeCoAlarm>());
 		
 		if (devices == null) {
 			return;
@@ -451,28 +350,32 @@ public class NestApi {
 		if (smokeco == null) {
 			return;
 		}
-		
-		smokeCoAlarms = Collections.synchronizedList(new ArrayList<SmokeCoAlarm>());
-		
+
 		for ( String name : JSONObject.getNames(smokeco) ) {
 			JSONObject item = smokeco.getJSONObject(name);
-			smokeCoAlarms.add(new SmokeCoAlarm(item.toString()));
+			
+			SmokeCoAlarm newAlarm = new SmokeCoAlarm(this);
+			newAlarm.parseJson(item.toString());
+			
+			smokeCoAlarms.add(newAlarm);
 		}
 	}
 
-	private synchronized void parseStructures (JSONObject json) throws Exception {
+	private void parseStructures (JSONObject json) throws Exception {
 		JSONObject struct = json.optJSONObject(NEST_API_STRCUTURES_KEY);
-		
+		structures = Collections.synchronizedList(new ArrayList<Structure>());
+				
 		if (struct == null) {
 			return;
 		}
-		
-		structures = Collections.synchronizedList(new ArrayList<Structure>());
-		
+
 		for ( String name : JSONObject.getNames(struct) ) {
 			JSONObject item = struct.getJSONObject(name);
 			
-			structures.add(new Structure(item.toString()));
+			Structure newStruct = new Structure(this);
+			newStruct.parseJson(item.toString());
+			
+			structures.add(newStruct);
 		}		
 	}
 }

@@ -4,13 +4,14 @@ import java.util.Date;
 
 import org.json.JSONObject;
 
-import ca.chrisgraham.nest.api.NestApiChangeItem;
+import ca.chrisgraham.nest.api.NestApi;
 import ca.chrisgraham.nest.api.NestApiDeviceInterface;
 import ca.chrisgraham.nest.api.NestApiUtility;
 
 import ca.chrisgraham.nest.api.type.HvacModeState;
 import ca.chrisgraham.nest.api.type.TempState;
 
+import ca.chrisgraham.nest.api.exception.NestApiException;
 import ca.chrisgraham.nest.api.exception.NestApiParseException;
 import ca.chrisgraham.nest.api.exception.NestApiValidationException;
 
@@ -23,7 +24,7 @@ import static ca.chrisgraham.nest.api.NestApiKeyConstants.*;
  * @author Chris Graham
  * @since 0.0.1
  */
-public class Thermostat implements NestApiDeviceInterface {
+public class Thermostat extends NestApiDeviceInterface<Thermostat> {
 	private final static String NEST_API_THERMOSTAT_ITEM_UPDATE_PATH = "/devices/thermostats/%s/%s/";
 	
 	private String deviceId = null;
@@ -55,19 +56,8 @@ public class Thermostat implements NestApiDeviceInterface {
 	private Integer ambientTemperatureF = 0;
 	private Double ambientTemperatureC = 0.0;
 	
-	private boolean fanTimerActiveChanged = false;
-	private boolean targetTemperatureFChanged = false;
-	private boolean targetTemperatureCChanged = false;
-	private boolean targetTemperatureHighFChanged = false;
-	private boolean targetTemperatureHighCChanged = false;
-	private boolean targetTemperatureLowFChanged = false;
-	private boolean targetTemperatureLowCChanged = false;
-	private boolean hvacModeChanged = false;
-	
-	public Thermostat (String jsonString) throws NestApiParseException {
-		if ( NestApiUtility.isNotBlank(jsonString) ) { 
-			parseJson (jsonString);
-		}
+	public Thermostat (NestApi apiAccess) throws NestApiException {
+		super(apiAccess);
 	}
 	
 	@Override
@@ -82,7 +72,7 @@ public class Thermostat implements NestApiDeviceInterface {
 	}
 	
 	@Override
-	public Object getParameterValueByName (String parameterName) throws NestApiParseException {
+	public Object getParameterValueByName (String parameterName) throws NestApiException {
 		if ( parameterName.equals(NEST_API_THERMOSTAT_DEVICE_ID_KEY) ) {
 			return this.deviceId;
 		} else if ( parameterName.equals(NEST_API_THERMOSTAT_LOCALE_KEY) ) {
@@ -145,7 +135,7 @@ public class Thermostat implements NestApiDeviceInterface {
 	}
 	
 	@Override
-	public void parseJson (String jsonString) throws NestApiParseException {
+	public void parseJson (String jsonString) throws NestApiException {
 		JSONObject json = new JSONObject(jsonString);
 
 		this.deviceId = json.getString(NEST_API_THERMOSTAT_DEVICE_ID_KEY);
@@ -199,502 +189,447 @@ public class Thermostat implements NestApiDeviceInterface {
 	}
 
 	@Override
-	public NestApiChangeItem[] getChanges () {
-		NestApiChangeItem[] changed = new NestApiChangeItem[countChanges()];
-		int i = 0;
-		
-		if ( fanTimerActiveChanged ) {
-			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_FAN_TIMER_ACTIVE_KEY) , this.fanTimerActive.toString());
-			i++;
-		}
-		
-		if ( targetTemperatureFChanged ) {
-			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_TARGET_TEMPERATURE_F_KEY) , Integer.toString(this.targetTemperatureF));
-			i++;
-		}
-
-		if ( targetTemperatureCChanged ) {
-			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_TARGET_TEMPERATURE_C_KEY) , Double.toString(this.targetTemperatureC));
-			i++;
-		}
-
-		if ( targetTemperatureHighFChanged ) {
-			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_TARGET_TEMPERATURE_HIGH_F_KEY) , Integer.toString(this.targetTemperatureHighF));
-			i++;
-		}
-
-		if ( targetTemperatureHighCChanged ) {
-			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_TARGET_TEMPERATURE_HIGH_C_KEY) , Double.toString(this.targetTemperatureHighC));
-			i++;
-		}
-
-		if ( targetTemperatureLowFChanged ) {
-			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_TARGET_TEMPERATURE_LOW_F_KEY) , Integer.toString(this.targetTemperatureLowF));
-			i++;
-		}
-
-		if ( targetTemperatureLowCChanged ) {
-			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_TARGET_TEMPERATURE_LOW_C_KEY) , Double.toString(this.targetTemperatureLowC));
-			i++;
-		}
-
-		if ( hvacModeChanged ) {
-			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_HVAC_MODE_KEY) , this.hvacMode.toString());
-			i++;
-		}
-		
-		return changed;
-	}
-	
-	@Override 
-	public int countChanges () {
-		int i = 0;
-		
-		if ( fanTimerActiveChanged ) i++;
-		if ( targetTemperatureFChanged ) i++;
-		if ( targetTemperatureCChanged )  i++;
-		if ( targetTemperatureHighFChanged )  i++;
-		if ( targetTemperatureHighCChanged )  i++;
-		if ( targetTemperatureLowFChanged )  i++;
-		if ( targetTemperatureLowCChanged )  i++;
-		if ( hvacModeChanged ) i++;
-		
-		return i;
-	}
-	
-	@Override
-	public boolean isChanged() {
-		return (fanTimerActiveChanged || targetTemperatureFChanged || targetTemperatureCChanged ||
-				targetTemperatureHighFChanged || targetTemperatureHighCChanged || targetTemperatureLowFChanged ||
-				targetTemperatureLowCChanged || hvacModeChanged);
-	}
-
-	@Override
-	public int compareTo(NestApiDeviceInterface o) {
-		return this.getId().compareTo(o.getId());
-	}
+    public int compareTo (Thermostat o) {
+        return this.getDeviceId().compareTo(o.getDeviceId());
+    }
 	
 	/**
 	 * @return the deviceId
 	 */
-	public String getDeviceId() {
+	public String getDeviceId () {
 		return deviceId;
 	}
 	
 	/**
 	 * @param deviceId the deviceId to set
 	 */
-	public void setDeviceId(String deviceId) throws NestApiValidationException {
+	public void setDeviceId (String deviceId) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_DEVICE_ID_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the locale
 	 */
-	public String getLocale() {
+	public String getLocale () {
 		return locale;
 	}
 	
 	/**
 	 * @param locale the locale to set
 	 */
-	public void setLocale(String locale) throws NestApiValidationException {
+	public void setLocale (String locale) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_LOCALE_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the softwareVersion
 	 */
-	public String getSoftwareVersion() {
+	public String getSoftwareVersion () {
 		return softwareVersion;
 	}
 	
 	/**
 	 * @param softwareVersion the softwareVersion to set
 	 */
-	public void setSoftwareVersion(String softwareVersion) throws NestApiValidationException {
+	public void setSoftwareVersion (String softwareVersion) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_SOFTWARE_VERSION_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the name
 	 */
-	public String getName() {
+	public String getName () {
 		return name;
 	}
 	
 	/**
 	 * @param name the name to set
 	 */
-	public void setName(String name) throws NestApiValidationException {
+	public void setName (String name) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_NAME_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the nameLong
 	 */
-	public String getNameLong() {
+	public String getNameLong () {
 		return nameLong;
 	}
 	
 	/**
 	 * @param nameLong the nameLong to set
 	 */
-	public void setNameLong(String nameLong) throws NestApiValidationException {
+	public void setNameLong (String nameLong) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_NAME_LONG_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the lastConnection
 	 */
-	public Date getLastConnection() {
+	public Date getLastConnection () {
 		return lastConnection;
 	}
 	
 	/**
 	 * @param lastConnection the lastConnection to set
 	 */
-	public void setLastConnection(Date lastConnection) throws NestApiValidationException {
+	public void setLastConnection (Date lastConnection) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_LAST_CONNECTION_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the isOnline
 	 */
-	public Boolean getIsOnline() {
+	public Boolean getIsOnline () {
 		return isOnline;
 	}
 	
 	/**
 	 * @param isOnline the isOnline to set
 	 */
-	public void setIsOnline(Boolean isOnline) throws NestApiValidationException {
+	public void setIsOnline (Boolean isOnline) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_IS_ONLINE_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the canCool
 	 */
-	public Boolean getCanCool() {
+	public Boolean getCanCool () {
 		return canCool;
 	}
 	
 	/**
 	 * @param canCool the canCool to set
 	 */
-	public void setCanCool(Boolean canCool) throws NestApiValidationException {
+	public void setCanCool (Boolean canCool) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_CAN_COOL_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the canHeat
 	 */
-	public Boolean getCanHeat() {
+	public Boolean getCanHeat () {
 		return canHeat;
 	}
 	
 	/**
 	 * @param canHeat the canHeat to set
 	 */
-	public void setCanHeat(Boolean canHeat) throws NestApiValidationException {
+	public void setCanHeat (Boolean canHeat) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_CAN_HEAT_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the isUsingEmergencyHeat
 	 */
-	public Boolean getIsUsingEmergencyHeat() {
+	public Boolean getIsUsingEmergencyHeat () {
 		return isUsingEmergencyHeat;
 	}
 	
 	/**
 	 * @param isUsingEmergencyHeat the isUsingEmergencyHeat to set
 	 */
-	public void setIsUsingEmergencyHeat(Boolean isUsingEmergencyHeat) throws NestApiValidationException {
+	public void setIsUsingEmergencyHeat (Boolean isUsingEmergencyHeat) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_IS_USING_EMERGENCY_HEAT_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the hasFan
 	 */
-	public Boolean getHasFan() {
+	public Boolean getHasFan () {
 		return hasFan;
 	}
 	
 	/**
 	 * @param hasFan the hasFan to set
 	 */
-	public void setHasFan(Boolean hasFan) throws NestApiValidationException {
+	public void setHasFan (Boolean hasFan) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_HAS_FAN_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the fanTimerActive
 	 */
-	public Boolean getFanTimerActive() {
+	public Boolean getFanTimerActive () {
 		return fanTimerActive;
 	}
 	
 	/**
 	 * @param fanTimerActive the fanTimerActive to set
 	 */
-	public void setFanTimerActive(Boolean fanTimerActive) throws NestApiValidationException {
-		this.fanTimerActiveChanged = true;
+	public void setFanTimerActive (Boolean fanTimerActive) throws NestApiException {
+		String url = String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.getDeviceId(), NEST_API_THERMOSTAT_FAN_TIMER_ACTIVE_KEY);
+		sendNestApiUpdates(url, fanTimerActive.toString());
+		
 		this.fanTimerActive = fanTimerActive;
 	}
 	
 	/**
 	 * @return the fanTimerTimeout
 	 */
-	public Date getFanTimerTimeout() {
+	public Date getFanTimerTimeout () {
 		return fanTimerTimeout;
 	}
 	
 	/**
 	 * @param fanTimerTimeout the fanTimerTimeout to set
 	 */
-	public void setFanTimerTimeout(Date fanTimerTimeout) throws NestApiValidationException {
+	public void setFanTimerTimeout (Date fanTimerTimeout) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_FAN_TIMER_TIMEOUT_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the hasLeaf
 	 */
-	public Boolean getHasLeaf() {
+	public Boolean getHasLeaf () {
 		return hasLeaf;
 	}
 	
 	/**
 	 * @param hasLeaf the hasLeaf to set
 	 */
-	public void setHasLeaf(Boolean hasLeaf) throws NestApiValidationException {
+	public void setHasLeaf (Boolean hasLeaf) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_HAS_LEAF_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the temperatureScale
 	 */
-	public TempState getTemperatureScale() {
+	public TempState getTemperatureScale () {
 		return temperatureScale;
 	}
 	
 	/**
 	 * @param temperatureScale the temperatureScale to set
 	 */
-	public void setTemperatureScale(TempState temperatureScale) throws NestApiValidationException {
+	public void setTemperatureScale (TempState temperatureScale) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_TEMPERATURE_SCALE_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the targetTemperatureF
 	 */
-	public Integer getTargetTemperatureF() {
+	public Integer getTargetTemperatureF () {
 		return targetTemperatureF;
 	}
 	
 	/**
 	 * @param targetTemperatureF the targetTemperatureF to set
 	 */
-	public void setTargetTemperatureF(Integer targetTemperatureF) throws NestApiValidationException {
+	public void setTargetTemperatureF (Integer targetTemperatureF) throws NestApiException {
 		if ( this.temperatureScale.equals(TempState.C) ) {
 			throw new NestApiValidationException("The parameter '" + NEST_API_THERMOSTAT_TARGET_TEMPERATURE_F_KEY + "' cannot be set when '" + NEST_API_THERMOSTAT_TEMPERATURE_SCALE_KEY + "' is set to '" + TempState.C + "'.");
 		}
 		
-		this.targetTemperatureFChanged = true;
+		String url = String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.getDeviceId(), NEST_API_THERMOSTAT_TARGET_TEMPERATURE_F_KEY);
+		sendNestApiUpdates(url, Integer.toString(targetTemperatureF));
+		
 		this.targetTemperatureF = targetTemperatureF;
 	}
 	
 	/**
 	 * @return the targetTemperatureC
 	 */
-	public Double getTargetTemperatureC() {
+	public Double getTargetTemperatureC () {
 		return targetTemperatureC;
 	}
 	
 	/**
 	 * @param targetTemperatureC the targetTemperatureC to set
 	 */
-	public void setTargetTemperatureC(Double targetTemperatureC) throws NestApiValidationException {
+	public void setTargetTemperatureC (Double targetTemperatureC) throws NestApiException {
 		if ( this.temperatureScale.equals(TempState.F) ) {
 			throw new NestApiValidationException("The parameter '" + NEST_API_THERMOSTAT_TARGET_TEMPERATURE_C_KEY + "' cannot be set when '" + NEST_API_THERMOSTAT_TEMPERATURE_SCALE_KEY + "' is set to '" + TempState.F + "'.");
 		}
 		
-		this.targetTemperatureCChanged = true;
+		String url = String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.getDeviceId(), NEST_API_THERMOSTAT_TARGET_TEMPERATURE_C_KEY);
+		sendNestApiUpdates(url, Double.toString(targetTemperatureC));
+		
 		this.targetTemperatureC = targetTemperatureC;
 	}
 	
 	/**
 	 * @return the targetTemperatureHighF
 	 */
-	public Integer getTargetTemperatureHighF() {
+	public Integer getTargetTemperatureHighF () {
 		return targetTemperatureHighF;
 	}
 	
 	/**
 	 * @param targetTemperatureHighF the targetTemperatureHighF to set
 	 */
-	public void setTargetTemperatureHighF(Integer targetTemperatureHighF) throws NestApiValidationException {
+	public void setTargetTemperatureHighF (Integer targetTemperatureHighF) throws NestApiException {
 		if ( this.temperatureScale.equals(TempState.C) ) {
 			throw new NestApiValidationException("The parameter '" + NEST_API_THERMOSTAT_TARGET_TEMPERATURE_HIGH_F_KEY + "' cannot be set when '" + NEST_API_THERMOSTAT_TEMPERATURE_SCALE_KEY + "' is set to '" + TempState.C + "'.");
 		}
 		
-		this.targetTemperatureHighFChanged = true;
+		String url = String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.getDeviceId(), NEST_API_THERMOSTAT_TARGET_TEMPERATURE_HIGH_F_KEY);
+		sendNestApiUpdates(url, Integer.toString(targetTemperatureHighF));
+		
 		this.targetTemperatureHighF = targetTemperatureHighF;
 	}
 	
 	/**
 	 * @return the targetTemperatureHighC
 	 */
-	public Double getTargetTemperatureHighC() {
+	public Double getTargetTemperatureHighC () {
 		return targetTemperatureHighC;
 	}
 	
 	/**
 	 * @param targetTemperatureHighC the targetTemperatureHighC to set
 	 */
-	public void setTargetTemperatureHighC(Double targetTemperatureHighC) throws NestApiValidationException {
+	public void setTargetTemperatureHighC (Double targetTemperatureHighC) throws NestApiException {
 		if ( this.temperatureScale.equals(TempState.F) ) {
 			throw new NestApiValidationException("The parameter '" + NEST_API_THERMOSTAT_TARGET_TEMPERATURE_HIGH_C_KEY + "' cannot be set when '" + NEST_API_THERMOSTAT_TEMPERATURE_SCALE_KEY + "' is set to '" + TempState.F + "'.");
 		}
 		
-		this.targetTemperatureHighCChanged = true;
+		String url = String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.getDeviceId(), NEST_API_THERMOSTAT_TARGET_TEMPERATURE_HIGH_C_KEY);
+		sendNestApiUpdates(url, Double.toString(targetTemperatureHighC));
+		
 		this.targetTemperatureHighC = targetTemperatureHighC;
 	}
 	
 	/**
 	 * @return the targetTemperatureLowF
 	 */
-	public Integer getTargetTemperatureLowF() {
+	public Integer getTargetTemperatureLowF () {
 		return targetTemperatureLowF;
 	}
 	
 	/**
 	 * @param targetTemperatureLowF the targetTemperatureLowF to set
 	 */
-	public void setTargetTemperatureLowF(Integer targetTemperatureLowF) throws NestApiValidationException {
+	public void setTargetTemperatureLowF (Integer targetTemperatureLowF) throws NestApiException {
 		if ( this.temperatureScale.equals(TempState.C) ) {
 			throw new NestApiValidationException("The parameter '" + NEST_API_THERMOSTAT_TARGET_TEMPERATURE_LOW_F_KEY + "' cannot be set when '" + NEST_API_THERMOSTAT_TEMPERATURE_SCALE_KEY + "' is set to '" + TempState.C + "'.");
 		}
 		
-		this.targetTemperatureLowFChanged = true;
+		String url = String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.getDeviceId(), NEST_API_THERMOSTAT_TARGET_TEMPERATURE_LOW_F_KEY);
+		sendNestApiUpdates(url, Integer.toString(targetTemperatureLowF));
+		
 		this.targetTemperatureLowF = targetTemperatureLowF;
 	}
 	
 	/**
 	 * @return the targetTemperatureLowC
 	 */
-	public Double getTargetTemperatureLowC() {
+	public Double getTargetTemperatureLowC () {
 		return targetTemperatureLowC;
 	}
 	
 	/**
 	 * @param targetTemperatureLowC the targetTemperatureLowC to set
 	 */
-	public void setTargetTemperatureLowC(Double targetTemperatureLowC) throws NestApiValidationException {
+	public void setTargetTemperatureLowC (Double targetTemperatureLowC) throws NestApiException {
 		if ( this.temperatureScale.equals(TempState.F) ) {
 			throw new NestApiValidationException("The parameter '" + NEST_API_THERMOSTAT_TARGET_TEMPERATURE_LOW_C_KEY + "' cannot be set when '" + NEST_API_THERMOSTAT_TEMPERATURE_SCALE_KEY + "' is set to '" + TempState.F + "'.");
 		}
 		
-		this.targetTemperatureLowCChanged = true;
+		String url = String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.getDeviceId(), NEST_API_THERMOSTAT_TARGET_TEMPERATURE_LOW_C_KEY);
+		sendNestApiUpdates(url, Double.toString(targetTemperatureLowC));
+		
 		this.targetTemperatureLowC = targetTemperatureLowC;
 	}
 	
 	/**
 	 * @return the awayTemperatureHighF
 	 */
-	public Integer getAwayTemperatureHighF() {
+	public Integer getAwayTemperatureHighF () {
 		return awayTemperatureHighF;
 	}
 	
 	/**
 	 * @param awayTemperatureHighF the awayTemperatureHighF to set
 	 */
-	public void setAwayTemperatureHighF(Integer awayTemperatureHighF) throws NestApiValidationException {
+	public void setAwayTemperatureHighF (Integer awayTemperatureHighF) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_DEVICE_ID_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the awayTemperatureHighC
 	 */
-	public Double getAwayTemperatureHighC() {
+	public Double getAwayTemperatureHighC () {
 		return awayTemperatureHighC;
 	}
 	
 	/**
 	 * @param awayTemperatureHighC the awayTemperatureHighC to set
 	 */
-	public void setAwayTemperatureHighC(Double awayTemperatureHighC) throws NestApiValidationException {
+	public void setAwayTemperatureHighC (Double awayTemperatureHighC) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_DEVICE_ID_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the awayTemperatureLowF
 	 */
-	public Integer getAwayTemperatureLowF() {
+	public Integer getAwayTemperatureLowF () {
 		return awayTemperatureLowF;
 	}
 	
 	/**
 	 * @param awayTemperatureLowF the awayTemperatureLowF to set
 	 */
-	public void setAwayTemperatureLowF(Integer awayTemperatureLowF) throws NestApiValidationException {
+	public void setAwayTemperatureLowF (Integer awayTemperatureLowF) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_DEVICE_ID_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the awayTemperatureLowC
 	 */
-	public Double getAwayTemperatureLowC() {
+	public Double getAwayTemperatureLowC () {
 		return awayTemperatureLowC;
 	}
 	
 	/**
 	 * @param awayTemperatureLowC the awayTemperatureLowC to set
 	 */
-	public void setAwayTemperatureLowC(Double awayTemperatureLowC) throws NestApiValidationException {
+	public void setAwayTemperatureLowC (Double awayTemperatureLowC) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_DEVICE_ID_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the hvacMode
 	 */
-	public HvacModeState getHvacMode() {
+	public HvacModeState getHvacMode () {
 		return hvacMode;
 	}
 	
 	/**
 	 * @param hvacMode the hvacMode to set
 	 */
-	public void setHvacMode(HvacModeState hvacMode) throws NestApiValidationException {
-		this.hvacModeChanged = true;
+	public void setHvacMode (HvacModeState hvacMode) throws NestApiException {
+		String url = String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.getDeviceId(), NEST_API_THERMOSTAT_HVAC_MODE_KEY);
+		sendNestApiUpdates(url, hvacMode.toString());
+		
 		this.hvacMode = hvacMode;
 	}
 	
 	/**
 	 * @return the ambientTemperatureF
 	 */
-	public Integer getAmbientTemperatureF() {
+	public Integer getAmbientTemperatureF () {
 		return ambientTemperatureF;
 	}
 	
 	/**
 	 * @param ambientTemperatureF the ambientTemperatureF to set
 	 */
-	public void setAmbientTemperatureF(Integer ambientTemperatureF) throws NestApiValidationException {
+	public void setAmbientTemperatureF (Integer ambientTemperatureF) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_AMBIENT_TEMPERATURE_F_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 	
 	/**
 	 * @return the ambientTemperatureC
 	 */
-	public Double getAmbientTemperatureC() {
+	public Double getAmbientTemperatureC () {
 		return ambientTemperatureC;
 	}
 	
 	/**
 	 * @param ambientTemperatureC the ambientTemperatureC to set
 	 */
-	public void setAmbientTemperatureC(Double ambientTemperatureC) throws NestApiValidationException {
+	public void setAmbientTemperatureC (Double ambientTemperatureC) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_AMBIENT_TEMPERATURE_C_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 }

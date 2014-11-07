@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.json.JSONObject;
 
-import ca.chrisgraham.nest.api.NestApiChangeItem;
+import ca.chrisgraham.nest.api.NestApi;
 import ca.chrisgraham.nest.api.NestApiDeviceInterface;
 import ca.chrisgraham.nest.api.NestApiUtility;
 
@@ -13,6 +13,7 @@ import ca.chrisgraham.nest.api.type.BatteryHealthState;
 import ca.chrisgraham.nest.api.type.UiColorState;
 
 
+import ca.chrisgraham.nest.api.exception.NestApiException;
 import ca.chrisgraham.nest.api.exception.NestApiParseException;
 import ca.chrisgraham.nest.api.exception.NestApiValidationException;
 
@@ -25,8 +26,8 @@ import static ca.chrisgraham.nest.api.NestApiKeyConstants.*;
  * @author Chris Graham
  * @since 0.0.1
  */
-public class SmokeCoAlarm implements NestApiDeviceInterface {
-	private final static String NEST_API_SMOKE_CO_ALARM_ITEM_UPDATE_PATH = "/devices/smoke_co_alarms/%s/%s/";
+public class SmokeCoAlarm extends NestApiDeviceInterface<SmokeCoAlarm> {
+	//private final static String NEST_API_SMOKE_CO_ALARM_ITEM_UPDATE_PATH = "/devices/smoke_co_alarms/%s/%s/";
 	
 	private String deviceId = null;
 	private String locale = null;
@@ -39,11 +40,9 @@ public class SmokeCoAlarm implements NestApiDeviceInterface {
 	private AlarmState coAlarmState = null;
 	private AlarmState smokeAlarmState = null;
 	private UiColorState uiColorState = null;
-
-	public SmokeCoAlarm (String jsonString) throws NestApiParseException {
-		if ( NestApiUtility.isNotBlank(jsonString) ) { 
-			parseJson (jsonString);
-		}
+	
+	public SmokeCoAlarm (NestApi apiAccess) throws NestApiException {
+		super(apiAccess);
 	}
 	
 	@Override
@@ -57,7 +56,7 @@ public class SmokeCoAlarm implements NestApiDeviceInterface {
 	}
 	
 	@Override
-	public Object getParameterValueByName (String parameterName) throws NestApiParseException {
+	public Object getParameterValueByName (String parameterName) throws NestApiException {
 		if ( parameterName.equals(NEST_API_SMOKE_CO_DEVICE_ID_KEY) ) {
 			return this.deviceId;
 		} else if ( parameterName.equals(NEST_API_SMOKE_CO_LOCALE_KEY) ) {
@@ -86,7 +85,7 @@ public class SmokeCoAlarm implements NestApiDeviceInterface {
 	}
 
 	@Override
-	public void parseJson (String jsonString) throws NestApiParseException {
+	public void parseJson (String jsonString) throws NestApiException {
 		JSONObject json = new JSONObject(jsonString);
 
 		this.deviceId = json.getString(NEST_API_SMOKE_CO_DEVICE_ID_KEY);
@@ -141,178 +140,163 @@ public class SmokeCoAlarm implements NestApiDeviceInterface {
 			throw new NestApiParseException("Unknown UI color: " + uiColor);
 		}		
 	}
-	
+
 	@Override
-	public NestApiChangeItem[] getChanges () {		
-		return new NestApiChangeItem[0];
-	}
-	
-	@Override
-	public int countChanges() {
-		return 0;
-	}
-	
-	@Override
-	public boolean isChanged() {
-		return false;
-	}
-	
-	@Override
-	public int compareTo(NestApiDeviceInterface o) {
-		return this.getId().compareTo(o.getId());
-	}
+    public int compareTo (SmokeCoAlarm o) {
+        return this.getDeviceId().compareTo(o.getDeviceId());
+    }
 	
 	/**
 	 * @return the deviceId
 	 */
-	public String getDeviceId() {
+	public String getDeviceId () {
 		return deviceId;
 	}
 
 	/**
 	 * @param deviceId the deviceId to set
 	 */
-	public void setDeviceId(String deviceId) throws NestApiValidationException {
+	public void setDeviceId (String deviceId) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_DEVICE_ID_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 
 	/**
 	 * @return the locale
 	 */
-	public String getLocale() {
+	public String getLocale () {
 		return locale;
 	}
 
 	/**
 	 * @param locale the locale to set
 	 */
-	public void setLocale(String locale)  throws NestApiValidationException {
+	public void setLocale (String locale)  throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_LOCALE_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 
 	/**
 	 * @return the softwareVersion
 	 */
-	public String getSoftwareVersion() {
+	public String getSoftwareVersion () {
 		return softwareVersion;
 	}
 
 	/**
 	 * @param softwareVersion the softwareVersion to set
 	 */
-	public void setSoftwareVersion(String softwareVersion)  throws NestApiValidationException {
+	public void setSoftwareVersion (String softwareVersion)  throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_SOFTWARE_VERSION_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 
 	/**
 	 * @return the name
 	 */
-	public String getName() {
+	public String getName () {
 		return name;
 	}
 
 	/**
 	 * @param name the name to set
 	 */
-	public void setName(String name)  throws NestApiValidationException {
+	public void setName (String name)  throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_NAME_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 
 	/**
 	 * @return the nameLong
 	 */
-	public String getNameLong() {
+	public String getNameLong () {
 		return nameLong;
 	}
 
 	/**
 	 * @param nameLong the nameLong to set
 	 */
-	public void setNameLong(String nameLong)  throws NestApiValidationException {
+	public void setNameLong (String nameLong)  throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_NAME_LONG_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 
 	/**
 	 * @return the lastConnection
 	 */
-	public Date getLastConnection() {
+	public Date getLastConnection () {
 		return lastConnection;
 	}
 
 	/**
 	 * @param lastConnection the lastConnection to set
 	 */
-	public void setLastConnection(Date lastConnection)  throws NestApiValidationException {
+	public void setLastConnection (Date lastConnection)  throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_LAST_CONNECTION_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 
 	/**
 	 * @return the isOnline
 	 */
-	public Boolean getIsOnline() {
+	public Boolean getIsOnline () {
 		return isOnline;
 	}
 
 	/**
 	 * @param isOnline the isOnline to set
 	 */
-	public void setIsOnline(Boolean isOnline)  throws NestApiValidationException {
+	public void setIsOnline (Boolean isOnline)  throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_IS_ONLINE_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 
 	/**
 	 * @return the batteryHealth
 	 */
-	public BatteryHealthState getBatteryHealth() {
+	public BatteryHealthState getBatteryHealth () {
 		return batteryHealth;
 	}
 
 	/**
 	 * @param batteryHealth the batteryHealth to set
 	 */
-	public void setBatteryHealth(BatteryHealthState batteryHealth)  throws NestApiValidationException {
+	public void setBatteryHealth (BatteryHealthState batteryHealth)  throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_BATTERY_HEALTH_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 
 	/**
 	 * @return the coAlarmState
 	 */
-	public AlarmState getCoAlarmState() {
+	public AlarmState getCoAlarmState () {
 		return coAlarmState;
 	}
 
 	/**
 	 * @param coAlarmState the coAlarmState to set
 	 */
-	public void setCoAlarmState(AlarmState coAlarmState)  throws NestApiValidationException {
+	public void setCoAlarmState (AlarmState coAlarmState)  throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_CO_ALARM_STATE_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 
 	/**
 	 * @return the smokeAlarmState
 	 */
-	public AlarmState getSmokeAlarmState() {
+	public AlarmState getSmokeAlarmState () {
 		return smokeAlarmState;
 	}
 
 	/**
 	 * @param smokeAlarmState the smokeAlarmState to set
 	 */
-	public void setSmokeAlarmState(AlarmState smokeAlarmState)  throws NestApiValidationException {
+	public void setSmokeAlarmState (AlarmState smokeAlarmState)  throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_SMOKE_ALARM_STATE_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 
 	/**
 	 * @return the uiColorState
 	 */
-	public UiColorState getUiColorState() {
+	public UiColorState getUiColorState () {
 		return uiColorState;
 	}
 
 	/**
 	 * @param uiColorState the uiColorState to set
 	 */
-	public void setUiColorState(UiColorState uiColorState)  throws NestApiValidationException {
+	public void setUiColorState (UiColorState uiColorState)  throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_UI_COLOR_STATE_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 }

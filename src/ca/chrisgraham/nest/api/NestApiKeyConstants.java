@@ -16,6 +16,8 @@ public final class NestApiKeyConstants {
 	public final static String NEST_API_SMOKE_CO_ALARMS_KEY = "smoke_co_alarms";
 	public final static String NEST_API_STRCUTURES_KEY = "structures";
 	
+	public final static String NEST_API_ERROR_RESPONSE_KEY = "error";
+	
 	public final static String NEST_API_THERMOSTAT_DEVICE_ID_KEY = "device_id";
 	public final static String NEST_API_THERMOSTAT_LOCALE_KEY = "locale";
 	public final static String NEST_API_THERMOSTAT_SOFTWARE_VERSION_KEY = "software_version";

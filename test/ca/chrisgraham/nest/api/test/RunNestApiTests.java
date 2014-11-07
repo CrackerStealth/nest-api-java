@@ -92,12 +92,10 @@ public class RunNestApiTests {
 		System.out.println("====");
 		
 		try {
-			Thermostat therm = nestApi.getThermostatById((nestApi.getStructureIdList()[0]));
-			therm.setFanTimerActive(true);
-			nestApi.submit();
+			Thermostat therm = nestApi.getThermostatById((nestApi.getThermostatIdList()[0]));
+			therm.setTargetTemperatureC(19.0);
 		} catch (Exception ex) {
 			System.out.println("Exception: " + ex.getMessage());
 		}
 	}
-
 }
