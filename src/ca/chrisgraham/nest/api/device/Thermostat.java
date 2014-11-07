@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.json.JSONObject;
 
+import ca.chrisgraham.nest.api.NestApiChangeItem;
 import ca.chrisgraham.nest.api.NestApiDeviceInterface;
 import ca.chrisgraham.nest.api.NestApiUtility;
 
@@ -23,6 +24,8 @@ import static ca.chrisgraham.nest.api.NestApiKeyConstants.*;
  * @since 0.0.1
  */
 public class Thermostat implements NestApiDeviceInterface {
+	private final static String NEST_API_THERMOSTAT_ITEM_UPDATE_PATH = "/devices/thermostats/%s/%s/";
+	
 	private String deviceId = null;
 	private String locale = null;
 	private String softwareVersion = null;
@@ -196,42 +199,67 @@ public class Thermostat implements NestApiDeviceInterface {
 	}
 
 	@Override
-	public String formatChangedJson () {
-		JSONObject json = new JSONObject();
+	public NestApiChangeItem[] getChanges () {
+		NestApiChangeItem[] changed = new NestApiChangeItem[countChanges()];
+		int i = 0;
 		
 		if ( fanTimerActiveChanged ) {
-			json.put(NEST_API_THERMOSTAT_FAN_TIMER_ACTIVE_KEY, this.fanTimerActive);
+			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_FAN_TIMER_ACTIVE_KEY) , this.fanTimerActive.toString());
+			i++;
 		}
 		
 		if ( targetTemperatureFChanged ) {
-			json.put(NEST_API_THERMOSTAT_TARGET_TEMPERATURE_F_KEY, this.targetTemperatureF);
+			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_TARGET_TEMPERATURE_F_KEY) , Integer.toString(this.targetTemperatureF));
+			i++;
 		}
 
 		if ( targetTemperatureCChanged ) {
-			json.put(NEST_API_THERMOSTAT_TARGET_TEMPERATURE_C_KEY, this.targetTemperatureC);
+			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_TARGET_TEMPERATURE_C_KEY) , Double.toString(this.targetTemperatureC));
+			i++;
 		}
 
 		if ( targetTemperatureHighFChanged ) {
-			json.put(NEST_API_THERMOSTAT_TARGET_TEMPERATURE_HIGH_F_KEY, this.targetTemperatureHighF);
+			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_TARGET_TEMPERATURE_HIGH_F_KEY) , Integer.toString(this.targetTemperatureHighF));
+			i++;
 		}
 
 		if ( targetTemperatureHighCChanged ) {
-			json.put(NEST_API_THERMOSTAT_TARGET_TEMPERATURE_HIGH_C_KEY, this.targetTemperatureHighC);
+			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_TARGET_TEMPERATURE_HIGH_C_KEY) , Double.toString(this.targetTemperatureHighC));
+			i++;
 		}
 
 		if ( targetTemperatureLowFChanged ) {
-			json.put(NEST_API_THERMOSTAT_TARGET_TEMPERATURE_LOW_F_KEY, this.targetTemperatureLowF);
+			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_TARGET_TEMPERATURE_LOW_F_KEY) , Integer.toString(this.targetTemperatureLowF));
+			i++;
 		}
 
 		if ( targetTemperatureLowCChanged ) {
-			json.put(NEST_API_THERMOSTAT_TARGET_TEMPERATURE_LOW_C_KEY, this.targetTemperatureLowC);
+			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_TARGET_TEMPERATURE_LOW_C_KEY) , Double.toString(this.targetTemperatureLowC));
+			i++;
 		}
 
 		if ( hvacModeChanged ) {
-			json.put(NEST_API_THERMOSTAT_HVAC_MODE_KEY, this.hvacMode);
+			changed[i] = new NestApiChangeItem(String.format(NEST_API_THERMOSTAT_ITEM_UPDATE_PATH, this.deviceId, NEST_API_THERMOSTAT_HVAC_MODE_KEY) , this.hvacMode.toString());
+			i++;
 		}
 		
-		return json.toString();
+		return changed;
+	}
+	
+	@Override 
+	public int countChanges () {
+		int i = 0;
+		
+		if ( fanTimerActiveChanged ) i++;
+		if ( targetTemperatureFChanged ) i++;
+		if ( targetTemperatureCChanged )  i++;
+		if ( targetTemperatureHighFChanged )  i++;
+		if ( targetTemperatureHighCChanged )  i++;
+		if ( targetTemperatureLowFChanged )  i++;
+		if ( targetTemperatureLowCChanged )  i++;
+		if ( hvacModeChanged ) i++;
+		
+		return i;
 	}
 	
 	@Override

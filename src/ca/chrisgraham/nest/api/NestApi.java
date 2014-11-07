@@ -211,22 +211,25 @@ public class NestApi {
 		
 		for (Thermostat item : thermostats) {
 			if ( item.isChanged() ) {
-				JSONObject changes = new JSONObject(item.formatChangedJson());
-				thermJson.put(item.getDeviceId(), changes);
+				for (NestApiChangeItem change : item.getChanges() ) {
+					System.out.println(sendNestApiUpdates(change.getPath(), change.getChangedData()));
+				}
 			}
 		}
 		
 		for (SmokeCoAlarm item : smokeCoAlarms) {
 			if ( item.isChanged() ) {
-				JSONObject changes = new JSONObject(item.formatChangedJson());
-				smokeCoJson.put(item.getDeviceId(), changes);
+				for (NestApiChangeItem change : item.getChanges() ) {
+					System.out.println(sendNestApiUpdates(change.getPath(), change.getChangedData()));
+				}
 			}
 		}
 		
 		for (Structure item : structures) {
 			if ( item.isChanged() ) {
-				JSONObject changes = new JSONObject(item.formatChangedJson());
-				smokeCoJson.put(item.getStructureId(), changes);
+				for (NestApiChangeItem change : item.getChanges() ) {
+					System.out.println(sendNestApiUpdates(change.getPath(), change.getChangedData()));
+				}
 			}
 		}
 		
@@ -245,20 +248,6 @@ public class NestApi {
 		if ( structJson.length() >0 ) {
 			rootJson.put(NEST_API_STRCUTURES_KEY, structJson);
 		}
-		
-		String response = null;
-		
-		try {
-			response = sendNestApiUpdates(rootJson.toString());
-		} catch (UnsupportedEncodingException ex) {
-			throw new NestApiException("Could not encode URL parameters to communicate with the Nest API: " + ex.getMessage());
-		} catch (IOException ex) {
-			throw new NestApiCommunicationException("Could not communicate with the Nest API: " + ex.getMessage());
-		} catch (InterruptedException ex) {
-			throw new NestApiCommunicationException("The Nest API took too long to respond: " + ex.getMessage());
-		}
-		
-		JSONObject jsonResponse = new JSONObject(response);
 		
 		forceRefresh();
 	}
@@ -408,17 +397,25 @@ public class NestApi {
 		return response;
 	}
 	
-	private String sendNestApiUpdates (String body) throws IOException, InterruptedException, UnsupportedEncodingException {
-		String response = null;
-		
-		StringBuilder requestParam = new StringBuilder();
-		NestApiUtility.addEncodedParameter(requestParam, NEST_API_AUTH_PARAMETER_NAME, token);
-		
-		String url = NEST_API_URL + "?" + requestParam.toString();
-		
-		response = NestApiUtility.handleHTTPSPost(url, body, timeout);
-		
-		return response;
+	private String sendNestApiUpdates (String path, String body) throws NestApiException, NestApiCommunicationException {
+		try {
+			String response = null;
+			
+			StringBuilder requestParam = new StringBuilder();
+			NestApiUtility.addEncodedParameter(requestParam, NEST_API_AUTH_PARAMETER_NAME, token);
+			
+			String url = NEST_API_URL + path + "?" + requestParam.toString();
+			
+			response = NestApiUtility.handleHTTPSPut(url, body, timeout);
+			
+			return response;
+		} catch (UnsupportedEncodingException ex) {
+			throw new NestApiException("Could not encode URL parameters to communicate with the Nest API: " + ex.getMessage());
+		} catch (IOException ex) {
+			throw new NestApiCommunicationException("Could not communicate with the Nest API: " + ex.getMessage());
+		} catch (InterruptedException ex) {
+			throw new NestApiCommunicationException("The Nest API took too long to respond: " + ex.getMessage());
+		}
 	}
 	
 	private synchronized void parseThermostats (JSONObject json) throws Exception {		

@@ -10,7 +10,8 @@ public interface NestApiDeviceInterface extends Comparable<NestApiDeviceInterfac
 	public Object getParameterValueByName(String parameterName) throws NestApiException;
 	
 	public void parseJson (String jsonString) throws NestApiException;
-	public String formatChangedJson () throws NestApiException ;
+	public NestApiChangeItem[] getChanges ();
+	public int countChanges ();
 	
-	public boolean isChanged();
+	abstract boolean isChanged();
 }

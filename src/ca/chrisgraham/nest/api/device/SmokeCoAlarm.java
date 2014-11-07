@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.json.JSONObject;
 
+import ca.chrisgraham.nest.api.NestApiChangeItem;
 import ca.chrisgraham.nest.api.NestApiDeviceInterface;
 import ca.chrisgraham.nest.api.NestApiUtility;
 
@@ -25,6 +26,8 @@ import static ca.chrisgraham.nest.api.NestApiKeyConstants.*;
  * @since 0.0.1
  */
 public class SmokeCoAlarm implements NestApiDeviceInterface {
+	private final static String NEST_API_SMOKE_CO_ALARM_ITEM_UPDATE_PATH = "/devices/smoke_co_alarms/%s/%s/";
+	
 	private String deviceId = null;
 	private String locale = null;
 	private String softwareVersion = null;
@@ -140,10 +143,13 @@ public class SmokeCoAlarm implements NestApiDeviceInterface {
 	}
 	
 	@Override
-	public String formatChangedJson () {
-		JSONObject json = new JSONObject();
-		
-		return json.toString();
+	public NestApiChangeItem[] getChanges () {		
+		return new NestApiChangeItem[0];
+	}
+	
+	@Override
+	public int countChanges() {
+		return 0;
 	}
 	
 	@Override

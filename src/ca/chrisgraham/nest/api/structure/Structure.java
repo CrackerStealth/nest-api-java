@@ -5,6 +5,7 @@ import java.util.TimeZone;
 
 import org.json.JSONObject;
 
+import ca.chrisgraham.nest.api.NestApiChangeItem;
 import ca.chrisgraham.nest.api.NestApiDeviceInterface;
 import ca.chrisgraham.nest.api.NestApiUtility;
 
@@ -23,6 +24,8 @@ import static ca.chrisgraham.nest.api.NestApiKeyConstants.*;
  * @since 0.0.1
  */
 public class Structure implements NestApiDeviceInterface {
+	private final static String NEST_API_STRUCTURE_ITEM_UPDATE_PATH = " /structures/%s/%s/";
+	
 	private String structureId = null;
 	private TenantState away = null;
 	private String name = null;
@@ -97,21 +100,34 @@ public class Structure implements NestApiDeviceInterface {
 	}
 
 	@Override
-	public String formatChangedJson() throws NestApiParseException {
-		JSONObject json = new JSONObject();
+	public NestApiChangeItem[] getChanges () {
+		NestApiChangeItem[] changed = new NestApiChangeItem[countChanges()];
+		int i = 0;
 		
 		if ( awayChanged ) {
-			json.put(NEST_API_STRUCT_AWAY_KEY, this.away);
+			changed[i] = new NestApiChangeItem(String.format(NEST_API_STRUCTURE_ITEM_UPDATE_PATH, this.structureId, NEST_API_STRUCT_AWAY_KEY) , this.away.toString());
+			i++;
 		}
 		
 		if ( this.structureEta.isChanged() ) {
 			JSONObject etaJson = new JSONObject(this.structureEta.formatChangedJson());
-			json.put(NEST_API_STRUCT_ETA_KEY, etaJson);
+			changed[i] = new NestApiChangeItem(String.format(NEST_API_STRUCTURE_ITEM_UPDATE_PATH, this.structureId, NEST_API_STRUCT_ETA_KEY) , etaJson.toString());
+			i++;
 		}
 		
-		return json.toString();
+		return changed;
 	}
 
+	@Override 
+	public int countChanges () {
+		int i = 0;
+		
+		if ( awayChanged )  i++;
+		if ( this.structureEta.isChanged() ) i++;
+		
+		return i;
+	}
+	
 	@Override
 	public boolean isChanged() {
 		return ( awayChanged || structureEta.isChanged() );

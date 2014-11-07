@@ -18,7 +18,7 @@ import static ca.chrisgraham.nest.api.NestApiKeyConstants.*;
  * @author Chris Graham
  * @since 0.0.1
  */
-public class StructureEta implements NestApiDeviceInterface {
+public class StructureEta {
 	private String tripId = null;
 	private Date estimatedArrivalWindowBegin = null;
 	private Date estimatedArrivalWindowEnd = null;
@@ -33,17 +33,14 @@ public class StructureEta implements NestApiDeviceInterface {
 		}
 	}
 	
-	@Override
 	public String getType() {
 		return NEST_API_STRUCT_ETA_KEY;
 	}
 
-	@Override
 	public String getId () {
 		return this.tripId;
 	}
 	
-	@Override
 	public Object getParameterValueByName(String parameterName) throws NestApiParseException {
 		if ( parameterName.equals(NEST_API_STRUCT_TRIP_ID_KEY) ) {
 			return this.tripId;
@@ -56,7 +53,6 @@ public class StructureEta implements NestApiDeviceInterface {
 		}
 	}
 
-	@Override
 	public void parseJson(String jsonString) throws NestApiParseException {
 		JSONObject json = new JSONObject(jsonString);
 		
@@ -65,7 +61,6 @@ public class StructureEta implements NestApiDeviceInterface {
 		this.estimatedArrivalWindowEnd = NestApiUtility.parseJsonDate(json.getString(NEST_API_STRUCT_ESTIMATED_ARRIVAL_WINDOW_END_KEY));
 	}
 
-	@Override
 	public String formatChangedJson() {
 		JSONObject json = new JSONObject();
 		
@@ -84,12 +79,10 @@ public class StructureEta implements NestApiDeviceInterface {
 		return json.toString();
 	}
 
-	@Override
 	public boolean isChanged() {
 		return ( tripIdChanged || estimatedArrivalWindowBeginChanged || estimatedArrivalWindowEndChanged );
 	}
 	
-	@Override
 	public int compareTo(NestApiDeviceInterface o) {
 		return this.getId().compareTo(o.getId());
 	}
