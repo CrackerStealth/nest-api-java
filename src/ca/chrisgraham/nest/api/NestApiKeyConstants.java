@@ -47,7 +47,8 @@ public final class NestApiKeyConstants {
 	public final static String NEST_API_THERMOSTAT_HVAC_MODE_KEY = "hvac_mode";
 	public final static String NEST_API_THERMOSTAT_AMBIENT_TEMPERATURE_F_KEY = "ambient_temperature_f";
 	public final static String NEST_API_THERMOSTAT_AMBIENT_TEMPERATURE_C_KEY = "ambient_temperature_c";
-
+	public final static String NEST_API_THERMOSTAT_HUMIDITY_KEY = "humidity";
+	
 	public final static String NEST_API_SMOKE_CO_DEVICE_ID_KEY = "device_id";
 	public final static String NEST_API_SMOKE_CO_LOCALE_KEY = "locale";
 	public final static String NEST_API_SMOKE_CO_SOFTWARE_VERSION_KEY = "software_version";
@@ -60,6 +61,8 @@ public final class NestApiKeyConstants {
 	public final static String NEST_API_SMOKE_CO_CO_ALARM_STATE_KEY = "co_alarm_state";
 	public final static String NEST_API_SMOKE_CO_SMOKE_ALARM_STATE_KEY = "smoke_alarm_state";
 	public final static String NEST_API_SMOKE_CO_UI_COLOR_STATE_KEY = "ui_color_state";
+	public final static String NEST_API_SMOKE_CO_IS_MANUAL_TEST_ACTIVE_KEY = "is_manual_test_active";
+	public final static String NEST_API_SMOKE_CO_LAST_MANUAL_TEST_TIME_KEY = "last_manual_test_time";
 	
 	public final static String NEST_API_STRUCT_STRUCTURE_ID_KEY = "structure_id";
 	public final static String NEST_API_STRUCT_THERMOSTATS_KEY = "thermostats";
@@ -74,6 +77,7 @@ public final class NestApiKeyConstants {
 	public final static String NEST_API_STRUCT_TRIP_ID_KEY = "trip_id";
 	public final static String NEST_API_STRUCT_ESTIMATED_ARRIVAL_WINDOW_BEGIN_KEY = "estimated_arrival_window_begin";
 	public final static String NEST_API_STRUCT_ESTIMATED_ARRIVAL_WINDOW_END_KEY = "estimated_arrival_window_end";
+	public final static String NEST_API_STRUCT_POSTAL_CODE_KEY = "postal_code";
 	
 	public final static String NEST_API_THERMOSTAT_HVAC_MODE_HEAT_KEY = "heat";
 	public final static String NEST_API_THERMOSTAT_HVAC_MODE_COOL_KEY = "cool";

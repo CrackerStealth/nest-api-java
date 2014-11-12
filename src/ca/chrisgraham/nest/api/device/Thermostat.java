@@ -55,6 +55,7 @@ public class Thermostat extends NestApiDeviceInterface<Thermostat> {
 	private HvacModeState hvacMode = null;
 	private Integer ambientTemperatureF = 0;
 	private Double ambientTemperatureC = 0.0;
+	private Integer humidity = 0;
 	
 	public Thermostat (NestApi apiAccess) throws NestApiException {
 		super(apiAccess);
@@ -129,6 +130,8 @@ public class Thermostat extends NestApiDeviceInterface<Thermostat> {
 			return this.ambientTemperatureF;
 		} else if ( parameterName.equals(NEST_API_THERMOSTAT_AMBIENT_TEMPERATURE_C_KEY) ) {
 			return this.ambientTemperatureC;
+		} else if ( parameterName.equals(NEST_API_THERMOSTAT_HUMIDITY_KEY) ) {
+			return this.humidity;
 		} else {
 			throw new NestApiParseException("The parameter name '" + parameterName + "' does not exist in the Nest Thermostat device.");
 		}		
@@ -164,6 +167,7 @@ public class Thermostat extends NestApiDeviceInterface<Thermostat> {
 		this.awayTemperatureLowC = json.getDouble(NEST_API_THERMOSTAT_AWAY_TEMPERATURE_LOW_C_KEY);
 		this.ambientTemperatureF = json.getInt(NEST_API_THERMOSTAT_AMBIENT_TEMPERATURE_F_KEY);
 		this.ambientTemperatureC = json.getDouble(NEST_API_THERMOSTAT_AMBIENT_TEMPERATURE_C_KEY);
+		this.humidity = json.optInt(NEST_API_THERMOSTAT_HUMIDITY_KEY);
 		
 		String tempScale = json.getString(NEST_API_THERMOSTAT_TEMPERATURE_SCALE_KEY);
 		if ( tempScale.equals(NEST_API_THERMOSTAT_TEMP_UNITS_C_KEY) ) {
@@ -631,5 +635,19 @@ public class Thermostat extends NestApiDeviceInterface<Thermostat> {
 	 */
 	public void setAmbientTemperatureC (Double ambientTemperatureC) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_AMBIENT_TEMPERATURE_C_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
+	}
+	
+	/**
+	 * @return the humidity
+	 */
+	public Integer getHumidity() {
+		return humidity;
+	}
+
+	/**
+	 * @param humidity the humidity to set
+	 */
+	public void setHumidity(Integer humidity) throws NestApiException {
+		throw new NestApiValidationException("The '" + NEST_API_THERMOSTAT_HUMIDITY_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 }

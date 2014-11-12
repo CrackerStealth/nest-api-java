@@ -35,6 +35,7 @@ public class Structure extends NestApiDeviceInterface<Structure> {
 	private Date peakPeriodEndTime = null;
 	private TimeZone timeZone = null;
 	private StructureEta structureEta = null;
+	private String postalCode;
 	
 	public Structure (NestApi apiAccess) throws NestApiException {
 		super(apiAccess);
@@ -66,6 +67,8 @@ public class Structure extends NestApiDeviceInterface<Structure> {
 			return this.peakPeriodEndTime;
 		} else if ( parameterName.equals(NEST_API_STRUCT_TIME_ZONE_KEY) ) {
 			return this.timeZone;
+		} else if ( parameterName.equals(NEST_API_STRUCT_POSTAL_CODE_KEY) ) {
+			return this.postalCode;
 		} else {
 			throw new NestApiParseException("The parameter name '" + parameterName + "' does not exist in the Nest Structure object.");
 		}
@@ -81,6 +84,7 @@ public class Structure extends NestApiDeviceInterface<Structure> {
 		this.peakPeriodStartTime = NestApiUtility.parseJsonDate(json.optString(NEST_API_STRUCT_PEAK_PERIOD_START_TIME_KEY));
 		this.peakPeriodEndTime = NestApiUtility.parseJsonDate(json.optString(NEST_API_STRUCT_PEAK_PERIOD_END_TIME_KEY));
 		this.timeZone = TimeZone.getTimeZone(json.optString(NEST_API_STRUCT_TIME_ZONE_KEY));
+		this.postalCode = json.optString(NEST_API_STRUCT_POSTAL_CODE_KEY);
 		
 		String away = json.getString(NEST_API_STRUCT_AWAY_KEY);
 		if ( away.equals(NEST_API_STRUCT_TENANT_HOME_KEY) ) {
@@ -213,5 +217,19 @@ public class Structure extends NestApiDeviceInterface<Structure> {
 	public void setStructureEta (StructureEta structureEta) throws NestApiException {
 		String url = String.format(NEST_API_STRUCTURE_ITEM_UPDATE_PATH, NEST_API_STRUCT_ETA_KEY, this.getStructureId());
 		sendNestApiUpdates(url, structureEta.getJson());
+	}
+	
+	/**
+	 * @return the postalCode
+	 */
+	public String getPostalCode() {
+		return postalCode;
+	}
+
+	/**
+	 * @param postalCode the postalCode to set
+	 */
+	public void setPostalCode(String postalCode) throws NestApiException {
+		throw new NestApiValidationException("The '" + NEST_API_STRUCT_POSTAL_CODE_KEY + "' parameter is not updateable in the Nest API for a Structure object.");
 	}
 }

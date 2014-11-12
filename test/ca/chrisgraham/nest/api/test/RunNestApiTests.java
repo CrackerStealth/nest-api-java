@@ -58,6 +58,7 @@ public class RunNestApiTests {
 			System.out.println(therm.getAwayTemperatureLowC());
 			System.out.println(therm.getAmbientTemperatureF());
 			System.out.println(therm.getAmbientTemperatureC());
+			System.out.println(therm.getHumidity());
 		}
 
 		System.out.println("====");
@@ -70,6 +71,18 @@ public class RunNestApiTests {
 			
 			System.out.println(alarm.getId());
 			System.out.println(alarm.getDeviceId());
+			System.out.println(alarm.getLocale());
+			System.out.println(alarm.getSoftwareVersion());
+			System.out.println(alarm.getName());
+			System.out.println(alarm.getNameLong());
+			System.out.println(alarm.getLastConnection());
+			System.out.println(alarm.getIsOnline());
+			System.out.println(alarm.getBatteryHealth());
+			System.out.println(alarm.getCoAlarmState());
+			System.out.println(alarm.getSmokeAlarmState());
+			System.out.println(alarm.getUiColorState());
+			System.out.println(alarm.getIsManualTestActive());
+			System.out.println(alarm.lastManualTestTime);
 		}
 		
 		System.out.println("====");
@@ -88,7 +101,9 @@ public class RunNestApiTests {
 			System.out.println(struct.getPeakPeriodStartTime());
 			System.out.println(struct.getPeakPeriodEndTime());
 			System.out.println(struct.getTimeZone());
+			System.out.println(struct.getPostalCode());
 		}
+		
 		System.out.println("====");
 		
 		try {

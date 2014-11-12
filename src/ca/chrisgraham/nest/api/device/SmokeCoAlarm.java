@@ -40,6 +40,8 @@ public class SmokeCoAlarm extends NestApiDeviceInterface<SmokeCoAlarm> {
 	private AlarmState coAlarmState = null;
 	private AlarmState smokeAlarmState = null;
 	private UiColorState uiColorState = null;
+	public Boolean isManualTestActive = false;
+	public Date lastManualTestTime = null;
 	
 	public SmokeCoAlarm (NestApi apiAccess) throws NestApiException {
 		super(apiAccess);
@@ -79,6 +81,10 @@ public class SmokeCoAlarm extends NestApiDeviceInterface<SmokeCoAlarm> {
 			return this.smokeAlarmState;
 		} else if ( parameterName.equals(NEST_API_SMOKE_CO_UI_COLOR_STATE_KEY) ) {
 			return this.uiColorState;
+		} else if ( parameterName.equals(NEST_API_SMOKE_CO_IS_MANUAL_TEST_ACTIVE_KEY) ) {
+			return this.isManualTestActive;
+		} else if ( parameterName.equals(NEST_API_SMOKE_CO_LAST_MANUAL_TEST_TIME_KEY) ) {
+			return this.lastManualTestTime;
 		} else {
 			throw new NestApiParseException("The parameter name '" + parameterName + "' does not exist in the Nest Protect device.");
 		}	
@@ -95,6 +101,8 @@ public class SmokeCoAlarm extends NestApiDeviceInterface<SmokeCoAlarm> {
 		this.nameLong = json.getString(NEST_API_SMOKE_CO_NAME_LONG_KEY);
 		this.lastConnection = NestApiUtility.parseJsonDate(json.getString(NEST_API_SMOKE_CO_LAST_CONNECTION_KEY));
 		this.isOnline = json.getBoolean(NEST_API_SMOKE_CO_IS_ONLINE_KEY);
+		this.isManualTestActive = json.optBoolean(NEST_API_SMOKE_CO_IS_MANUAL_TEST_ACTIVE_KEY);
+		this.lastManualTestTime = NestApiUtility.parseJsonDate(json.optString(NEST_API_SMOKE_CO_LAST_MANUAL_TEST_TIME_KEY));
 		
 		String batteryHealth = json.getString(NEST_API_SMOKE_CO_BATTERY_HEALTH_KEY);
 		if ( batteryHealth.equals(NEST_API_SMOKE_CO_BATT_HEALTH_OK_KEY) ) {
@@ -296,7 +304,35 @@ public class SmokeCoAlarm extends NestApiDeviceInterface<SmokeCoAlarm> {
 	/**
 	 * @param uiColorState the uiColorState to set
 	 */
-	public void setUiColorState (UiColorState uiColorState)  throws NestApiException {
+	public void setUiColorState (UiColorState uiColorState) throws NestApiException {
 		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_UI_COLOR_STATE_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
+	}
+	
+	/**
+	 * @return the isManualTestActive
+	 */
+	public Boolean getIsManualTestActive() {
+		return isManualTestActive;
+	}
+
+	/**
+	 * @param isManualTestActive the isManualTestActive to set
+	 */
+	public void setIsManualTestActive(Boolean isManualTestActive) throws NestApiException {
+		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_IS_MANUAL_TEST_ACTIVE_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
+	}
+
+	/**
+	 * @return the lastManualTestTime
+	 */
+	public Date getLastManualTestTime() {
+		return lastManualTestTime;
+	}
+
+	/**
+	 * @param lastManualTestTime the lastManualTestTime to set
+	 */
+	public void setLastManualTestTime(Date lastManualTestTime) throws NestApiException {
+		throw new NestApiValidationException("The '" + NEST_API_SMOKE_CO_LAST_MANUAL_TEST_TIME_KEY + "' parameter is not updateable in the Nest API for a Nest Thermostat.");
 	}
 }
