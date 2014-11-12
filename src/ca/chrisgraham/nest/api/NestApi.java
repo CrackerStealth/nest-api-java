@@ -156,7 +156,7 @@ public class NestApi {
 		return response;
 	}
 	
-	public void refresh () throws NestApiException {
+	public synchronized void refresh () throws NestApiException {
 		String rawResponse = null;
 		
 		try {
@@ -313,7 +313,7 @@ public class NestApi {
 		return response;
 	}
 	
-	private void parseThermostats (JSONObject json) throws Exception {		
+	private synchronized void parseThermostats (JSONObject json) throws Exception {		
 		JSONObject devices = json.optJSONObject(NEST_API_DEVICES_KEY);
 		thermostats = Collections.synchronizedList(new ArrayList<Thermostat>());
 		
@@ -337,7 +337,7 @@ public class NestApi {
 		}
 	}
 
-	private void parseSmokeCoAlarms (JSONObject json) throws Exception {
+	private synchronized void parseSmokeCoAlarms (JSONObject json) throws Exception {
 		JSONObject devices = json.optJSONObject(NEST_API_DEVICES_KEY);
 		smokeCoAlarms = Collections.synchronizedList(new ArrayList<SmokeCoAlarm>());
 		
@@ -361,7 +361,7 @@ public class NestApi {
 		}
 	}
 
-	private void parseStructures (JSONObject json) throws Exception {
+	private synchronized void parseStructures (JSONObject json) throws Exception {
 		JSONObject struct = json.optJSONObject(NEST_API_STRCUTURES_KEY);
 		structures = Collections.synchronizedList(new ArrayList<Structure>());
 				
